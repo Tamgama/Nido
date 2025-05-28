@@ -1,43 +1,16 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button, TouchableHighlight, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Image, Button, Pressable, FlatList} from 'react-native';
 
-const icon = require('./assets/otter-logo.png')
+import DumpScreen from './src/screens/DumpScreen';
 
-export default function App() {
+
+const App = () =>{
   return (
-    <View style={styles.container}>
-      <Image source={icon} style={{width: 150, height: 150}}/>
-      <StatusBar style="auto"/>
-
-      <Text>Nido</Text>
-
-      <TouchableOpacity
-        onPress={() => alert('Bienvenide 💛')}
-        style={{
-          width: 200,
-          height: 50,
-          backgroundColor: 'orange',
-          borderColor: 'black',
-          borderRadius:20,
-          justifyContent: 'center',
-          alignItems: 'center'}}
-        >
-        <Text style={{color: 'white',
-          textAlign: 'center',
-          fontWeight: 'bold', 
-}}
-          > Gracias por venir </Text>
-      </TouchableOpacity>
-
+    <View>
+      <DumpScreen/>
     </View>
-  );
+  )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;

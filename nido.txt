@@ -1,0 +1,44 @@
+-------------------------------------------------
+
+Login screen 
+⚪ Login ( firebase?)
+    ⚪ Register ? Register screen
+    ⚪ Forgotten pass ? Password screen
+
+Inicio Pantalla principal
+- Notificaciones (mensajitos y ayudas) pop ups?
+- Calendario
+- Botón ayuda (aislamiento, comida,)
+
+NAVIGATION BAR
+⚪ Perfil
+    → avatar
+    → nombre / pronombre
+    → cambio avatar
+    → temas (nb, trans, claro/oscuro...)
+    → datos personales
+    → cuidados y necesidades
+    ⚪ INT
+        → actualizacion datos
+
+BOTTOM BAR
+⚪ Galería
+    ├─ Organización diaria, semanal, mensual
+    ├─ superpuestas x semanas
+⚪ Info dumping
+    ├─ Outfits
+    ├─ Películas y libros
+    ├─ ¿Sabías que...?
+    ├─ Planes por hacer
+    ├─ Restaurantes y recetas
+⚪ Nido
+    ├─ Avatares de todas
+    ├─ Reacciones
+    ├─ Objetivos 
+⚪ Calendarios
+    ├─ ⚪ Calendario emocional
+    ├─ Agendas
+⚪ Mensajes
+    ├─ Recibidos
+    ├─ Enviar
+
