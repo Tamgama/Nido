@@ -8,6 +8,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import CareListScreen from './src/screens/CareListScreen';
 import CareDetailScreen from './src/screens/CareDetailScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import ProfileEditScreen from './src/screens/ProfileEditScreen';
 import { TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -66,12 +67,17 @@ export default function App() {
           <Stack.Screen
             name="CareDetail"
             component={CareDetailScreen}
-            options={{ title: 'Profile Detail' }}
+            options={{ title: 'Información' }}
           />
           <Stack.Screen
             name="Profile"
             component={ProfileScreen}
-            options={{ title: 'My Profile' }}
+            options={{ title: 'Mi Perfil' }}
+          />
+          <Stack.Screen
+            name="ProfileEdit"
+            component={ProfileEditScreen}
+            options={{ title: 'Editar Perfil' }}
           />
         </Stack.Navigator>
       </NavigationContainer>

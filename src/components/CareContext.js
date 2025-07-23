@@ -8,6 +8,7 @@ const defaultProfiles = [
   {
     id: '1',
     name: 'Toñi',
+    pronouns: 'ella',
     offers: ['Escucha', 'Soluciones', 'Contacto físico'],
     cannot: ['Acompañamiento en conductas violentas'],
     schedule: 'Tardes',
@@ -17,8 +18,9 @@ const defaultProfiles = [
   {
     id: '2',
     name: 'Tam',
+    pronouns: 'elle',
     offers: ['Escucha', 'Meditación', 'Paseos'],
-    cannot: ['Gestión de tiempo y energía'],
+    cannot: ['Drogas', 'Violencia'],
     schedule: 'Mañanas',
     signals: ['Ironía', 'Poca paciencia'],
     needs: ['Salidas', 'Pasear', 'Opciones de ayuda']
@@ -30,20 +32,26 @@ export function CareProvider({ children }) {
   const [myProfileId, setMyProfileId] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      const stored = await AsyncStorage.getItem('profiles');
-      if (stored) {
-        setProfiles(JSON.parse(stored));
+  (async () => {
+    const stored = await AsyncStorage.getItem('profiles');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setProfiles(parsed);
       } else {
-        // 👇 Si no hay nada guardado, usamos los predeterminados
         setProfiles(defaultProfiles);
         await AsyncStorage.setItem('profiles', JSON.stringify(defaultProfiles));
       }
+    } else {
+      setProfiles(defaultProfiles);
+      await AsyncStorage.setItem('profiles', JSON.stringify(defaultProfiles));
+    }
 
-      const storedMyId = await AsyncStorage.getItem('myProfileId');
-      if (storedMyId) setMyProfileId(storedMyId);
-    })();
-  }, []);
+    const storedMyId = await AsyncStorage.getItem('myProfileId');
+    if (storedMyId) setMyProfileId(storedMyId);
+  })();
+}, []);
+
 
   const saveProfiles = async (newProfiles) => {
     setProfiles(newProfiles);
