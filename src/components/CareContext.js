@@ -13,7 +13,11 @@ const defaultProfiles = [
     cannot: ['Acompañamiento en conductas violentas'],
     schedule: 'Tardes',
     signals: ['Caracola', 'Falta de apetito'],
-    needs: ['Palabras de afirmación', 'Contacto físico']
+    needs: ['Palabras de afirmación', 'Contacto físico'],
+    triggers:['Falta de respeto', 'Discusiones grupales'],
+    howtohelp: ['Escuchar', 'Ofrecer soluciones', 'Contacto físico'],
+    emergencycontact: ['Bea', 'Tam', 'Conway'],
+    untolerable: ['Falta de respeto', 'Críticas destructivas'],
   },
   {
     id: '2',
@@ -23,7 +27,11 @@ const defaultProfiles = [
     cannot: ['Drogas', 'Violencia'],
     schedule: 'Mañanas',
     signals: ['Ironía', 'Poca paciencia'],
-    needs: ['Salidas', 'Pasear', 'Opciones de ayuda']
+    needs: ['Salidas', 'Pasear', 'Opciones de ayuda'],
+    triggers: ['Falta de respeto', 'Discusiones grupales'],
+    howtohelp: ['Mensajes', 'Visitas', 'Paseos'],
+    emergencycontact: ['Toñi', 'Conway'],
+    untolerable: ['Falta de respeto', 'Presión excesiva'],
   }
 ];
 
@@ -73,7 +81,7 @@ export function CareProvider({ children }) {
     await saveProfiles(newProfiles);
   };
 
-  const myProfile = profiles.find(p => p.id === myProfileId);
+  const myProfile = profiles.find(p => p.id === myProfileId) || profiles[0] || null;
 
   return (
     <CareContext.Provider value={{ profiles, myProfile, saveMyProfile }}>

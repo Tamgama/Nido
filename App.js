@@ -45,7 +45,7 @@ export default function App() {
             name="CareList"
             component={CareListScreen}
             options={({ navigation }) => ({
-              title: 'All Profiles',
+              title: 'Gestión de cuidados',
               headerRight: () => (
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Profile')}

@@ -1,5 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  Platform
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CareContext } from '../components/CareContext';
 
@@ -14,8 +25,11 @@ export default function ProfileEditScreen({ navigation }) {
   const [signals, setSignals] = useState('');
   const [needs, setNeeds] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [triggers, setTriggers] = useState(myProfile.triggers || []);
+  const [emergencycontact, setEmergencycontact] = useState(myProfile.emergencycontact || []);
+  const [howtohelp, setHowtohelp] = useState(myProfile.howtohelp || '');
+  const [untolerable, setUntolerable] = useState(myProfile.untolerable || []);
 
-  // precargar datos
   useEffect(() => {
     if (myProfile) {
       setName(myProfile.name || '');
@@ -26,6 +40,10 @@ export default function ProfileEditScreen({ navigation }) {
       setSignals((myProfile.signals || []).join(', '));
       setNeeds((myProfile.needs || []).join(', '));
       setAvatar(myProfile.avatar || '');
+      setTriggers((myProfile.triggers || []).join(', '));
+      setEmergencycontact((myProfile.emergencycontact || []).join(', '));
+      setHowtohelp((myProfile.howtohelp || []).join(', '));
+      setUntolerable((myProfile.untolerable || []).join(', '));
     }
   }, [myProfile]);
 
@@ -63,6 +81,10 @@ export default function ProfileEditScreen({ navigation }) {
       schedule,
       signals: signals.split(',').map(t => t.trim()).filter(Boolean),
       needs: needs.split(',').map(t => t.trim()).filter(Boolean),
+      triggers: triggers.split(',').map(t => t.trim()).filter(Boolean),
+      emergencycontact: emergencycontact.split(',').map(t => t.trim()).filter(Boolean),
+      howtohelp: howtohelp.split(',').map(t => t.trim()).filter(Boolean),
+      untolerable: untolerable.split(',').map(t => t.trim()).filter(Boolean),
     };
     saveMyProfile(profile);
     Alert.alert('¡Listo!', 'Perfil guardado correctamente.');
@@ -70,40 +92,54 @@ export default function ProfileEditScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Avatar */}
-      <View style={styles.avatarSection}>
-        <TouchableOpacity onPress={handlePickImage} style={styles.avatarWrapper}>
-          {avatar ? (
-            <Image source={{ uri: avatar }} style={styles.avatar} />
-          ) : (
-            <Text style={styles.addAvatarText}>Añadir foto</Text>
-          )}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={80}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Avatar */}
+        <View style={styles.avatarSection}>
+          <TouchableOpacity onPress={handlePickImage} style={styles.avatarWrapper}>
+            {avatar ? (
+              <Image source={{ uri: avatar }} style={styles.avatar} />
+            ) : (
+              <Text style={styles.addAvatarText}>Añadir foto</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Información básica */}
+        <Text style={styles.sectionTitle}>Información básica</Text>
+        <TextInput style={styles.input} placeholder="Nombre" value={name} onChangeText={setName} />
+        <TextInput style={styles.input} placeholder="Pronombres" value={pronouns} onChangeText={setPronouns} />
+        <TextInput style={styles.input} placeholder="Disponibilidad" value={schedule} onChangeText={setSchedule} />
+
+        {/* Cuidados */}
+        <Text style={styles.sectionTitle}>Cuidados</Text>
+        <TextInput style={styles.input} placeholder="Puedo (separar por comas)" value={offers} onChangeText={setOffers} />
+        <TextInput style={styles.input} placeholder="No puedo (separar por comas)" value={cannot} onChangeText={setCannot} />
+        <TextInput style={styles.input} placeholder="Señales de aviso (separar por comas)" value={signals} onChangeText={setSignals} />
+        <TextInput style={styles.input} placeholder="Necesidades (separar por comas)" value={needs} onChangeText={setNeeds} />
+        <TextInput style={styles.input} placeholder="Triggers (separar por comas)" value={triggers} onChangeText={setTriggers} />
+        <TextInput style={styles.input} placeholder="Contacto de emergencia (separar por comas)" value={emergencycontact} onChangeText={setEmergencycontact} />
+        <TextInput style={styles.input} placeholder="Cómo pedir ayuda (separar por comas)" value={howtohelp} onChangeText={setHowtohelp} />
+        <TextInput style={styles.input} placeholder="No tolera (separar por comas)" value={untolerable} onChangeText={setUntolerable} />
+
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>Guardar perfil</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Sección Información básica */}
-      <Text style={styles.sectionTitle}>Información básica</Text>
-      <TextInput style={styles.input} placeholder="Nombre" value={name} onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Pronombres" value={pronouns} onChangeText={setPronouns} />
-      <TextInput style={styles.input} placeholder="Disponibilidad" value={schedule} onChangeText={setSchedule} />
-
-      {/* Sección Cuidados */}
-      <Text style={styles.sectionTitle}>Cuidados</Text>
-      <TextInput style={styles.input} placeholder="Puedo (separar por comas)" value={offers} onChangeText={setOffers} />
-      <TextInput style={styles.input} placeholder="No puedo (separar por comas)" value={cannot} onChangeText={setCannot} />
-      <TextInput style={styles.input} placeholder="Señales de aviso (separar por comas)" value={signals} onChangeText={setSignals} />
-      <TextInput style={styles.input} placeholder="Necesidades (separar por comas)" value={needs} onChangeText={setNeeds} />
-
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Guardar perfil</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
   avatarSection: { alignItems: 'center', marginBottom: 20 },
   avatarWrapper: {
     width: 120,
@@ -120,6 +156,6 @@ const styles = StyleSheet.create({
   addAvatarText: { color: '#888' },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 15, marginBottom: 10 },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 10, marginBottom: 15 },
-  button: { backgroundColor: '#8AB0AB', padding: 15, borderRadius: 10, marginTop: 20 },
+  button: { backgroundColor: '#8AB0AB', padding: 15, borderRadius: 10, marginTop: 20, marginBottom: 50 },
   buttonText: { color: '#fff', textAlign: 'center', fontSize: 16 },
 });
