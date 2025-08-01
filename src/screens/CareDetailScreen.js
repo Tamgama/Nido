@@ -1,33 +1,23 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-import { CareContext } from '../components/CareContext';
-
-const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 
 export default function CareDetailScreen({ route }) {
-  const { profiles } = useContext(CareContext);
-  const { profileId } = route.params;
+  const { person } = route.params;
 
-  const person = profiles.find(p => p.id === profileId);
+  const defaultAvatar = 'https://via.placeholder.com/100'; // Imagen por defecto si no hay avatar
 
-  if (!person) {
+  const renderChips = (items) => {
+    if (!items || items.length === 0) return null;
     return (
-      <View style={styles.center}>
-        <Text style={styles.loading}>Cargando perfil...</Text>
+      <View style={styles.chipWrapper}>
+        {items.map((item, idx) => (
+          <View key={idx} style={styles.chip}>
+            <Text style={styles.chipText}>{item}</Text>
+          </View>
+        ))}
       </View>
     );
-  }
-
-  // función auxiliar para mostrar chips
-  const renderChips = (items = []) => (
-    <View style={styles.chipContainer}>
-      {items.map((item, idx) => (
-        <View key={idx} style={styles.chip}>
-          <Text style={styles.chipText}>{item}</Text>
-        </View>
-      ))}
-    </View>
-  );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -76,48 +66,67 @@ export default function CareDetailScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f9fc', padding: 16 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loading: { fontSize: 18, color: '#555' },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
   headerRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
-    backgroundColor: '#ddd',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#8AB0AB',
+    marginBottom: 10,
+    backgroundColor: '#eee',
   },
-  name: { fontSize: 26, fontWeight: 'bold', color: '#333' },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   section: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    marginBottom: 30,
   },
-  sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
   sectionTitleSmall: {
-    marginTop: 8,
     fontSize: 16,
     fontWeight: '600',
-    color: '#444',
+    marginTop: 10,
+    marginBottom: 4,
+    color: '#555',
   },
-  text: { fontSize: 15, color: '#555', marginTop: 4 },
-  chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
+  text: {
+    fontSize: 16,
+    marginLeft: 10,
+    marginTop: 4,
+  },
+  chipWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginLeft: 10,
+    marginTop: 4,
+  },
   chip: {
-    backgroundColor: '#e0f7fa',
-    paddingHorizontal: 10,
+    backgroundColor: '#E0F2F1',
+    borderRadius: 15,
     paddingVertical: 6,
-    borderRadius: 20,
-    margin: 4,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  chipText: { fontSize: 14, color: '#00796b', fontWeight: '500' },
+  chipText: {
+    fontSize: 14,
+    color: '#00695C',
+  },
 });

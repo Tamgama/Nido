@@ -14,7 +14,7 @@ const defaultProfiles = [
     schedule: 'Tardes',
     signals: ['Caracola', 'Falta de apetito'],
     needs: ['Palabras de afirmación', 'Contacto físico'],
-    triggers:['Falta de respeto', 'Discusiones grupales'],
+    triggers: ['Falta de respeto', 'Discusiones grupales'],
     howtohelp: ['Escuchar', 'Ofrecer soluciones', 'Contacto físico'],
     emergencycontact: ['Bea', 'Tam', 'Conway'],
     untolerable: ['Falta de respeto', 'Críticas destructivas'],
@@ -40,26 +40,25 @@ export function CareProvider({ children }) {
   const [myProfileId, setMyProfileId] = useState(null);
 
   useEffect(() => {
-  (async () => {
-    const stored = await AsyncStorage.getItem('profiles');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        setProfiles(parsed);
+    (async () => {
+      const stored = await AsyncStorage.getItem('profiles');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setProfiles(parsed);
+        } else {
+          setProfiles(defaultProfiles);
+          await AsyncStorage.setItem('profiles', JSON.stringify(defaultProfiles));
+        }
       } else {
         setProfiles(defaultProfiles);
         await AsyncStorage.setItem('profiles', JSON.stringify(defaultProfiles));
       }
-    } else {
-      setProfiles(defaultProfiles);
-      await AsyncStorage.setItem('profiles', JSON.stringify(defaultProfiles));
-    }
 
-    const storedMyId = await AsyncStorage.getItem('myProfileId');
-    if (storedMyId) setMyProfileId(storedMyId);
-  })();
-}, []);
-
+      const storedMyId = await AsyncStorage.getItem('myProfileId');
+      if (storedMyId) setMyProfileId(storedMyId);
+    })();
+  }, []);
 
   const saveProfiles = async (newProfiles) => {
     setProfiles(newProfiles);
@@ -69,7 +68,6 @@ export function CareProvider({ children }) {
   const saveMyProfile = async (profile) => {
     let newProfiles = [...profiles];
     if (myProfileId) {
-      // update
       newProfiles = newProfiles.map(p => p.id === myProfileId ? { ...profile, id: myProfileId } : p);
     } else {
       const id = Date.now().toString();
@@ -83,8 +81,37 @@ export function CareProvider({ children }) {
 
   const myProfile = profiles.find(p => p.id === myProfileId) || profiles[0] || null;
 
+  // ✅ Generar estructura agrupada por persona
+  const cuidados = profiles.map(p => ({
+    name: p.name,
+    pronouns: p.pronouns,
+    horario: p.schedule,
+    offers: p.offers || [],
+    cannot: p.cannot || [],
+    untolerable: p.untolerable || [],
+  }));
+
+  const necesidades = profiles.map(p => ({
+    name: p.name,
+    pronouns: p.pronouns,
+    horario: p.schedule,
+    signals: p.signals || [],
+    needs: p.needs || [],
+    triggers: p.triggers || [],
+    howtohelp: Array.isArray(p.howtohelp) ? p.howtohelp : [p.howtohelp],
+    emergencycontact: p.emergencycontact || [],
+  }));
+
   return (
-    <CareContext.Provider value={{ profiles, myProfile, saveMyProfile }}>
+    <CareContext.Provider
+      value={{
+        profiles,
+        cuidados,
+        necesidades,
+        myProfile,
+        saveMyProfile,
+      }}
+    >
       {children}
     </CareContext.Provider>
   );

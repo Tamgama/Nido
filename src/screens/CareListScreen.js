@@ -1,106 +1,142 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useMemo } from 'react';
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
-  Dimensions,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
-  Image,
+  TextInput,
 } from 'react-native';
 import { CareContext } from '../components/CareContext';
 
-const { width } = Dimensions.get('window');
-const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-
 export default function CareListScreen({ navigation }) {
-  const { profiles } = useContext(CareContext);
-
-  const necesidadesData = profiles.map(p => ({
-    id: p.id,
-    name: p.name,
-    signals: p.signals,
-    needs: p.needs,
-    avatar: p.avatar || defaultAvatar,
-  }));
-
-  const cuidadosData = profiles.map(p => ({
-    id: p.id,
-    name: p.name,
-    offers: p.offers,
-    cannot: p.cannot,
-    schedule: p.schedule,
-    avatar: p.avatar || defaultAvatar,
-  }));
-
-  const renderNecesidad = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate('CareDetail', { profileId: item.id })}
-    >
-      <View style={styles.headerRow}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        <Text style={styles.name}>{item.name}</Text>
+  const { cuidados, necesidades } = useContext(CareContext);
+  if (!cuidados || !necesidades) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: 50 }}>Cargando datos...</Text>
       </View>
-      {item.signals?.length > 0 && (
-        <Text style={styles.info}>👁️ Señales: {item.signals.join(', ')}</Text>
-      )}
-      {item.needs?.length > 0 && (
-        <Text style={styles.info}>❤️‍🩹 Necesidades: {item.needs.join(', ')}</Text>
-      )}
-    </TouchableOpacity>
-  );
+    );
+  }
 
-  const renderCuidado = ({ item }) => (
+  const [filtro, setFiltro] = useState('todos');
+  const [busqueda, setBusqueda] = useState('');
+
+  // Agrupar por name
+  const personas = useMemo(() => {
+    const agrupado = {};
+
+    [...cuidados, ...necesidades].forEach((item) => {
+      const tipo = cuidados.includes(item) ? 'cuidados' : 'necesidades';
+      const nombre = item.name || 'Anónimo';
+
+      if (!agrupado[nombre]) {
+        agrupado[nombre] = { cuidados: [], necesidades: [] };
+      }
+      agrupado[nombre][tipo].push(item);
+    });
+
+    return Object.entries(agrupado).map(([name, data]) => ({
+      name,
+      ...data,
+    }));
+  }, [cuidados, necesidades]);
+
+  // Aplicar filtros y búsqueda
+  const personasFiltradas = personas.filter((p) => {
+    if (filtro === 'cuidado' && p.cuidados.length === 0) return false;
+    if (filtro === 'necesidad' && p.necesidades.length === 0) return false;
+
+    const contenido = [
+      ...p.cuidados.map((c) => c.titulo),
+      ...p.necesidades.map((n) => n.titulo),
+    ].join(' ').toLowerCase();
+
+    return contenido.includes(busqueda.toLowerCase());
+  });
+
+  const renderItem = ({ item }) => {
+    const person = {
+      name: item.name,
+      avatar: null, // Puedes cambiarlo si tienes una imagen
+      pronouns: item.pronouns || '—',
+      schedule: item.cuidados[0]?.horario || item.necesidades[0]?.horario || 'No indicada',
+      offers: item.cuidados.map(c => c.titulo),
+      cannot: item.necesidades.map(n => n.titulo),
+      signals: item.necesidades.map(n => n.senales || []).flat(),
+      needs: item.necesidades.map(n => n.como_ayudar || []).flat(),
+      triggers: item.necesidades.map(n => n.triggers || []).flat(),
+      untolerable: item.necesidades.map(n => n.untolerable || []).flat(),
+      emergencycontact: item.necesidades.map(n => n.emergencycontact || []).flat(),
+      howtohelp: item.necesidades.find(n => n.howtohelp)?.howtohelp || '',
+    };
+
+     return (
     <TouchableOpacity
+      onPress={() => navigation.navigate('CareDetailScreen', { person })}
       style={styles.card}
-      onPress={() => navigation.navigate('CareDetail', { profileId: item.id })}
     >
-      <Text style={styles.name}>{item.name}</Text>
-      {item.offers?.length > 0 && (
-        <Text style={styles.info}>🫴 Cuenta conmigo para... {item.offers.join(', ')}</Text>
+      <Text style={styles.publisher}>👤 {item.name}</Text>
+
+      {/* Cuidados */}
+      {(item.offers?.length || item.cannot?.length || item.untolerable?.length) > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🫴 Cuidados</Text>
+          {[...(item.offers || []), ...(item.cannot || []), ...(item.untolerable || [])].map((cuidado, i) => (
+            <Text key={i} style={styles.itemText}>• {cuidado}</Text>
+          ))}
+        </View>
       )}
-      {item.cannot?.length > 0 && (
-        <Text style={styles.info}>🚩 No puedo sostener... {item.cannot.join(', ')}</Text>
+
+      {/* Necesidades */}
+      {(item.signals?.length || item.needs?.length || item.triggers?.length || item.howtohelp?.length) > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🆘 Necesidades</Text>
+          {[...(item.signals || []), ...(item.needs || []), ...(item.triggers || []), ...(Array.isArray(item.howtohelp) ? item.howtohelp : [item.howtohelp])].map((necesidad, i) => (
+            <Text key={i} style={styles.itemText}>• {necesidad}</Text>
+          ))}
+        </View>
       )}
-      {item.schedule ? (
-        <Text style={styles.info}>🕒 Disponibilidad: {item.schedule}</Text>
-      ) : null}
     </TouchableOpacity>
   );
+};
 
-  
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={{ flex: 1 }}
-      >
-        {/* NECESIDADES */}
-        <View style={{ width }}>
-          <Text style={styles.sectionTitle}>❤️‍🩹 Necesidades</Text>
-          <FlatList
-            data={necesidadesData}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderNecesidad}
-            contentContainerStyle={styles.listContainer}
-          />
-        </View>
+      {/* Filtros */}
+      <View style={styles.filtros}>
+        {['todos', 'cuidado', 'necesidad'].map((tipo) => (
+          <TouchableOpacity
+            key={tipo}
+            style={[
+              styles.botonFiltro,
+              filtro === tipo && styles.botonFiltroActivo,
+            ]}
+            onPress={() => setFiltro(tipo)}
+          >
+            <Text style={styles.textoFiltro}>
+              {tipo === 'todos' ? 'Todos' : tipo.charAt(0).toUpperCase() + tipo.slice(1) + 's'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* CUIDADOS */}
-        <View style={{ width }}>
-          <Text style={styles.sectionTitle}>🤝 Cuidados</Text>
-          <FlatList
-            data={cuidadosData}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderCuidado}
-            contentContainerStyle={styles.listContainer}
-          />
-        </View>
-      </ScrollView>
+      {/* Buscador */}
+      <TextInput
+        style={styles.buscador}
+        placeholder="Buscar por palabra clave..."
+        value={busqueda}
+        onChangeText={setBusqueda}
+      />
+
+      {/* Lista */}
+      <FlatList
+        data={personasFiltradas}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.lista}
+      />
     </View>
   );
 }
@@ -108,50 +144,64 @@ export default function CareListScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f9fc',
+    backgroundColor: '#f4f4f4',
+    paddingTop: 10,
   },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#444',
-    marginVertical: 10,
-    marginHorizontal: 20,
+  filtros: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
-  listContainer: {
+  botonFiltro: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: '#ccc',
+    borderRadius: 20,
+  },
+  botonFiltroActivo: {
+    backgroundColor: '#4a90e2',
+  },
+  textoFiltro: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+  },
+  buscador: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    fontSize: 16,
+  },
+  lista: {
+    paddingHorizontal: 10,
     paddingBottom: 20,
   },
   card: {
     backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-    backgroundColor: '#ddd',
+    marginBottom: 12,
+    borderRadius: 10,
+    padding: 15,
+    elevation: 2,
   },
   name: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 10,
   },
-  info: {
-    fontSize: 15,
+  section: {
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  itemText: {
+    marginLeft: 10,
     color: '#555',
-    marginTop: 4,
   },
 });
